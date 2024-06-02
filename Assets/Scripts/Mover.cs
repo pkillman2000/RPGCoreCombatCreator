@@ -10,6 +10,11 @@ public class Mover : MonoBehaviour
     private Transform _target;
 
     private NavMeshAgent _navMeshAgent;
+    private Animator _animator;
+
+    private Vector3 _globalVelocity;
+    private Vector3 _localVelocity;
+
 
     void Start()
     {
@@ -18,14 +23,22 @@ public class Mover : MonoBehaviour
         {
             Debug.LogError("Nav Mesh Agent is Null!");
         }
+
+        _animator = GetComponent<Animator>();
+        if(_animator == null)
+        {
+            Debug.LogError("Animator is Null!");
+        }
     }
 
     void Update()
     {
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButton(0))
         {
             MoveToCursor();
         }
+
+        UpdateAnimator();
     }
 
     private void MoveToCursor()
@@ -39,5 +52,14 @@ public class Mover : MonoBehaviour
         {
             _navMeshAgent.destination = hit.point;
         }
+    }
+
+    private void UpdateAnimator()
+    {
+        _globalVelocity = _navMeshAgent.velocity;
+        // Converts from global to local velocity
+        _localVelocity = transform.InverseTransformDirection(_globalVelocity);
+        // Only interested in forward axis (Z)
+        _animator.SetFloat("forwardSpeed", _localVelocity.z);
     }
 }

@@ -15,8 +15,8 @@ public class FollowCamera : MonoBehaviour
             Debug.LogError("Target is Null!");
         }
     }
-
-    void Update()
+    // Wait for animation to update before moving camera
+    void LateUpdate()
     {
         this.transform.position = _target.position;
     }
