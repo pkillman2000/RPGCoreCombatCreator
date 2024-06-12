@@ -11,7 +11,7 @@ namespace RPG.Combat
     */
     public class Fighter : MonoBehaviour, IAction
     {
-        private Transform _target;
+        private Health _target;
         
         [SerializeField]
         private float _weaponRange;
@@ -59,11 +59,17 @@ namespace RPG.Combat
             {
                 return;
             }
-            
+
+            // If target is dead, leave
+            if (!_target.IsAlive())
+            {
+                return;
+            }
+
             // Move until within weapon range
             if (_target != null && !GetIsInRange())
             {
-                _mover.MoveTo(_target.position);                
+                _mover.MoveTo(_target.transform.position);                
             }
             else
             {
@@ -75,19 +81,20 @@ namespace RPG.Combat
         // Compare current distance vs weapon range
         private bool GetIsInRange()
         {
-            return Vector3.Distance(this.transform.position, _target.position) <= _weaponRange;
+            return Vector3.Distance(this.transform.position, _target.transform.position) <= _weaponRange;
         }
 
         // Attack target
         public void Attack(CombatTarget target)
         {
-            _target = target.transform;
+            _target = target.GetComponent<Health>();
         }
 
         // Cancel attacking target
         public void Cancel()
         {
             _target = null;
+            _animator.SetTrigger("stopAttack");
         }
 
         // Animation for attacking
@@ -111,15 +118,8 @@ namespace RPG.Combat
          * effects, sound effects, etc
         */
         public void Hit()
-        {
-            Health health = _target.GetComponent<Health>();
-            if (health == null)
-            {
-                Debug.LogError("Health is Null!");
-            }
-            
-            health.TakeDamage(_weaponDamage);
+        {            
+            _target.TakeDamage(_weaponDamage);
         }
-
     }
 }
