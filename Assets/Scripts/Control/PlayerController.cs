@@ -4,6 +4,7 @@ using UnityEngine;
 using RPG.Movement;
 using RPG.Combat;
 using System;
+using UnityEditor.Experimental.GraphView;
 
 namespace RPG.Control
 {
@@ -53,7 +54,9 @@ namespace RPG.Control
             foreach (RaycastHit hit in hits)
             {
                 CombatTarget target = hit.transform.GetComponent<CombatTarget>();
-                if(target == null)
+
+                // Check if valid target.  If not, continue to next hit
+                if (!_fighter.CanAttack(target))
                 {
                     continue;
                 }

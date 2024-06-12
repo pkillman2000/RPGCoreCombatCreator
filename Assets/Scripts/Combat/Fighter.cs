@@ -84,6 +84,33 @@ namespace RPG.Combat
             return Vector3.Distance(this.transform.position, _target.transform.position) <= _weaponRange;
         }
 
+        // Check to see if valid target
+        public bool CanAttack(CombatTarget target)
+        {
+            /*
+             * Check to see if target is null.  If so,
+             * return false.
+             * 
+             * Note: This is testing against CombatTarget script.  Later
+             * we are testing vs the Health script.
+            */
+            if(target == null)
+            {
+                return false;
+            }
+
+            Health targetToTest = target.GetComponent<Health>();
+
+            /*
+             * If target is not null and target is alive,
+             * return true.  Otherwise, return false.
+             * 
+             * Note: This is now testing against the target having a Health
+             * script attached.
+            */
+            return targetToTest != null && targetToTest.IsAlive();
+        }
+
         // Attack target
         public void Attack(CombatTarget target)
         {
@@ -94,21 +121,43 @@ namespace RPG.Combat
         public void Cancel()
         {
             _target = null;
-            _animator.SetTrigger("stopAttack");
+            StopAttack();
         }
 
         // Animation for attacking
         private void AttackBehavior()
         {
-
+            transform.LookAt(_target.transform.position);
             _actionScheduler.StartAction(this);
 
             // Throttles the frequency of attacks
             if (_timeSinceLastAttack > _timeBetweenAttacks)
             {
-                _animator.SetTrigger("attack");                
+                TriggerAttack();
                 _timeSinceLastAttack = 0;
             }
+        }
+
+        /*
+         * This makes sure that the animator triggers are in the
+         * correct state for an attack.  If stopAttack is still
+         * triggered, it will cause a partial animation and then
+         * reset itself.
+        */
+        private void TriggerAttack()
+        {
+            _animator.ResetTrigger("stopAttack");
+            _animator.SetTrigger("attack");
+        }
+
+        /*
+         * This makes sure that the animator triggers are in the 
+         * correct state for an attack.
+        */
+        private void StopAttack()
+        {
+            _animator.SetTrigger("stopAttack");
+            _animator.ResetTrigger("attack");
         }
 
         /*
@@ -118,7 +167,12 @@ namespace RPG.Combat
          * effects, sound effects, etc
         */
         public void Hit()
-        {            
+        {   
+            if (_target == null)
+            {
+                return;
+            }
+
             _target.TakeDamage(_weaponDamage);
         }
     }

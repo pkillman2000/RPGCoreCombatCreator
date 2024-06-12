@@ -26,6 +26,17 @@ namespace RPG.Combat
             {
                 Debug.LogError("Collider is Null!");
             }
+
+            /*
+             * Make sure the collider is active.
+             * If this character has already died, the collider
+             * is probably turned off.  This will make sure that
+             * the collider is active if this character is respawned.
+            */
+            if(_collider.enabled == false)
+            {
+                _collider.enabled = true;
+            }
         }
 
         public void TakeDamage(float damage)
@@ -45,7 +56,11 @@ namespace RPG.Combat
         private void Die()
         {
             _isAlive = false;
-            // Disable the collider so that raycast doesn't see this character anymore.
+            /*
+             * Disable the collider so that raycast doesn't see this character anymore.
+             * This may break things later if we wish to respawn this character.
+             * Remember to turn the collider back on.
+            */
             _collider.enabled = false;
             _animator.SetTrigger("die");
         }

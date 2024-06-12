@@ -771,7 +771,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1865736754220819703, guid: 2a58d77ce22b7a940804b3d7aa2dd71e, type: 3}
       propertyPath: _healthPoints
-      value: 20
+      value: 200
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1669,6 +1669,10 @@ PrefabInstance:
     - target: {fileID: 8409908958687208432, guid: ee70db34a3e60e04a93f1b992b6962c2, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 8657714561535315148, guid: ee70db34a3e60e04a93f1b992b6962c2, type: 3}
+      propertyPath: m_UpdateMode
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
