@@ -85,7 +85,7 @@ namespace RPG.Combat
         }
 
         // Check to see if valid target
-        public bool CanAttack(CombatTarget target)
+        public bool CanAttack(GameObject target)
         {
             /*
              * Check to see if target is null.  If so,
@@ -112,7 +112,7 @@ namespace RPG.Combat
         }
 
         // Attack target
-        public void Attack(CombatTarget target)
+        public void Attack(GameObject target)
         {
             _target = target.GetComponent<Health>();
         }

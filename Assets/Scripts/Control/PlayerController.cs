@@ -54,16 +54,20 @@ namespace RPG.Control
             foreach (RaycastHit hit in hits)
             {
                 CombatTarget target = hit.transform.GetComponent<CombatTarget>();
+                if(target == null)
+                {
+                    continue;
+                }
 
                 // Check if valid target.  If not, continue to next hit
-                if (!_fighter.CanAttack(target))
+                if (!_fighter.CanAttack(target.gameObject))
                 {
                     continue;
                 }
 
                 if (Input.GetMouseButtonDown(0))
                 {
-                    _fighter.Attack(target);
+                    _fighter.Attack(target.gameObject);
                 }
                 return true;
             }
