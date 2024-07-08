@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1302243787815888527, guid: b8e0df9a91144494d85b7a6dc64761c4, type: 3}
+      propertyPath: _healthPoints
+      value: 200
+      objectReference: {fileID: 0}
     - target: {fileID: 3585534352634510707, guid: b8e0df9a91144494d85b7a6dc64761c4, type: 3}
       propertyPath: _weaponRange
       value: 2

@@ -1,57 +1,131 @@
-using RPG.Combat;
-using RPG.Movement;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using RPG.Combat;
+using RPG.Core;
+using RPG.Movement;
 using UnityEngine;
 
 namespace RPG.Control
 {
     public class AIController : MonoBehaviour
     {
+        [SerializeField] 
+        float chaseDistance = 5f;
+        [SerializeField] 
+        float suspicionTime = 3f;
+        [SerializeField] 
+        PatrolPath patrolPath;
+        [SerializeField] 
+        float waypointTolerance = 1f;
         [SerializeField]
-        private float _chaseDistance;
+        float waypointDwellTime = 2f;
 
-        private GameObject _player; 
-        private Mover _mover;
-        private Fighter _fighter;
+        Fighter fighter;
+        Health health;
+        Mover mover;
+        GameObject player;
 
+        Vector3 guardPosition;
+        float timeSinceLastSawPlayer = Mathf.Infinity;
+        float timeSinceArrivedAtWaypoint = Mathf.Infinity;
+        int currentWaypointIndex = 0;
 
-        void Start()
+        private void Start()
         {
-            _player = GameObject.FindWithTag("Player");
-            if (_player == null )
+            fighter = GetComponent<Fighter>();
+            health = GetComponent<Health>();
+            mover = GetComponent<Mover>();
+            player = GameObject.FindWithTag("Player");
+
+            guardPosition = transform.position;
+        }
+
+        private void Update()
+        {
+            if (health.IsDead()) return;
+
+            if (InAttackRangeOfPlayer() && fighter.CanAttack(player))
             {
-                Debug.LogError("Player is Null!");
+                AttackBehaviour();
+            }
+            else if (timeSinceLastSawPlayer < suspicionTime)
+            {
+                SuspicionBehaviour();
+            }
+            else
+            {
+                PatrolBehaviour();
             }
 
-            _mover = GetComponent<Mover>();
-            if (_mover == null)
+            UpdateTimers();
+        }
+
+        private void UpdateTimers()
+        {
+            timeSinceLastSawPlayer += Time.deltaTime;
+            timeSinceArrivedAtWaypoint += Time.deltaTime;
+        }
+
+        private void PatrolBehaviour()
+        {
+            Vector3 nextPosition = guardPosition;
+
+            if (patrolPath != null)
             {
-                Debug.LogError("Mover is Null!");
+                if (AtWaypoint())
+                {
+                    timeSinceArrivedAtWaypoint = 0;
+                    CycleWaypoint();
+                }
+                nextPosition = GetCurrentWaypoint();
             }
 
-            _fighter = GetComponent<Fighter>();
-            if (_fighter == null)
+            if (timeSinceArrivedAtWaypoint > waypointDwellTime)
             {
-                Debug.LogError("Fighter is Null!");
+
+                mover.StartMoveAction(nextPosition);
             }
         }
 
-        void Update()
+        private bool AtWaypoint()
         {
-            if(GetDistanceToPlayer() < _chaseDistance)
-            {
-                Debug.Log(this.gameObject.name + " is chasing!");
-            }
+            float distanceToWaypoint = Vector3.Distance(transform.position, GetCurrentWaypoint());
+            return distanceToWaypoint < waypointTolerance;
         }
 
-        private float GetDistanceToPlayer()
+        private void CycleWaypoint()
         {
-            if (_player != null)
-            {
-                return Vector3.Distance(this.transform.position, _player.transform.position);
-            }
-            return 1000;
+            currentWaypointIndex = patrolPath.GetNextIndex(currentWaypointIndex);
+        }
+
+        private Vector3 GetCurrentWaypoint()
+        {
+            return patrolPath.GetWaypoint(currentWaypointIndex);
+        }
+
+        private void SuspicionBehaviour()
+        {
+            GetComponent<ActionScheduler>().CancelCurrentAction();
+        }
+
+        private void AttackBehaviour()
+        {
+            timeSinceLastSawPlayer = 0;
+            fighter.Attack(player);
+        }
+
+        private bool InAttackRangeOfPlayer()
+        {
+            float distanceToPlayer = Vector3.Distance(player.transform.position, transform.position);
+            return distanceToPlayer < chaseDistance;
+        }
+
+        // Called by Unity
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(transform.position, chaseDistance);
         }
     }
 }
